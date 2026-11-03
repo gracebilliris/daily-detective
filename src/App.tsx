@@ -121,6 +121,7 @@ export default function App() {
     const next = discoverClue(activeCase, progress, clue.id);
     updateProgress(next);
     setAnnouncement(`${clue.title} added to your evidence. Check for newly unlocked leads.`);
+    window.requestAnimationFrame(() => document.getElementById(`lead-${clue.id}`)?.focus({ preventScroll: true }));
   }
 
   function togglePin(id: string) {
@@ -168,7 +169,7 @@ export default function App() {
         <section className="hero" aria-labelledby="hero-title">
           <div className="hero-copy">
             <div className="eyebrow"><span className="small-rule" /> YOUR DAILY MOMENT OF INTRIGUE</div>
-            <h1 id="hero-title">Every detail<br />has a <em>tell.</em></h1>
+            <h1 id="hero-title">Every detail<br /> has a <em>tell.</em></h1>
             <p>A scene. A few stories. One truth.<br />Take your time. Follow the things that don’t quite fit.</p>
             <a className="hero-link" href="#case-file">Open the case file <Icon name="arrow" size={18} /></a>
           </div>
@@ -184,6 +185,13 @@ export default function App() {
         {storageFailed && <p className="storage-warning" role="status">Your browser couldn’t save this investigation. You can still play, but progress may be lost when you leave.</p>}
         <div className="sr-only" aria-live="polite" aria-atomic="true">{announcement}</div>
 
+        <nav className="investigation-nav" aria-label="Investigation sections">
+          <a href="#evidence">Clues <span>{discovered.length}/{activeCase.clues.length}</span></a>
+          <a href="#suspects">People</a>
+          <a href="#notebook">Notebook</a>
+          <a href="#accusation">{progress.solved ? 'Solution' : 'Solve'}</a>
+        </nav>
+
         <div className="investigation-layout" id="case-file">
           <div className="case-column">
             <section className="case-cover panel" aria-labelledby="case-title">
@@ -192,25 +200,22 @@ export default function App() {
               <p className="case-subtitle">{activeCase.subtitle}</p>
               <div className="location-line"><span className="location-dot" />{activeCase.location}</div>
               <p className="case-brief">{activeCase.brief}</p>
+              <div className="case-next-action"><a className="primary-button" href={progress.solved || discovered.length === activeCase.clues.length ? '#accusation' : '#evidence'}>{progress.solved ? 'View the solution' : discovered.length === activeCase.clues.length ? 'Connect your evidence' : discovered.length ? 'Continue investigating' : 'Read your first clue'}<Icon name="arrow" size={18} /></a><p>Read the leads. Choose a person, a motive and two supporting clues. No time limit.</p></div>
               <blockquote>{activeCase.opening}</blockquote>
               <div className="case-progress"><span>{discovered.length} of {activeCase.clues.length} clues read</span><span>{percent}% explored</span></div>
               <div className="progress-track" role="progressbar" aria-label="Case exploration" aria-valuenow={discovered.length} aria-valuemin={0} aria-valuemax={activeCase.clues.length}><span style={{ width: `${percent}%` }} /></div>
             </section>
 
-            <section className="suspects-section" aria-labelledby="suspects-title">
-              <div className="section-heading"><h3 id="suspects-title">The people involved</h3><span>{activeCase.suspects.length} PERSONS OF INTEREST</span></div>
-              <div className="suspect-grid">{activeCase.suspects.map((suspect, index) => <article className="suspect-card" key={suspect.id}><div className="suspect-portrait" aria-hidden="true"><span>{suspect.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}</span><svg viewBox="0 0 90 90" fill="none"><circle cx="45" cy="34" r="15" /><path d="M18 88V76c0-17 12-26 27-26s27 9 27 26v12" /></svg><span className="portrait-index">0{index + 1}</span></div><h4>{suspect.name}</h4><p>{suspect.role}</p><details className="statement"><summary>Initial statement</summary><p>“{suspect.statement}”</p></details></article>)}</div>
-            </section>
-
-            <section className="evidence-section" aria-labelledby="evidence-title">
+            <section className="evidence-section" id="evidence" tabIndex={-1} aria-labelledby="evidence-title">
               <div className="section-heading"><h3 id="evidence-title">Follow the evidence</h3><span>{available.filter((clue) => !progress.discovered.includes(clue.id)).length} OPEN LEADS</span></div>
               <p className="section-intro">Read clues to unlock new leads. Pin useful details to your notebook, then connect the two that prove your theory.</p>
+              {announcement && <p className="investigation-update">{announcement}</p>}
               <div className="evidence-filters" role="group" aria-label="Filter evidence">{(['all', 'scene', 'interview', 'record'] as const).map((value) => <button key={value} type="button" className={filter === value ? 'active' : ''} aria-pressed={filter === value} onClick={() => setFilter(value)}>{value === 'all' ? 'All leads' : value === 'scene' ? 'The scene' : value === 'interview' ? 'Interviews' : 'Records'}</button>)}</div>
               <div className="clue-list">{activeCase.clues.filter((clue) => filter === 'all' || clue.kind === filter).map((clue, index) => {
                 const isRead = progress.discovered.includes(clue.id);
                 const isAvailable = readyIds.has(clue.id);
                 const missing = clue.requires.filter((id) => !progress.discovered.includes(id));
-                return <article className={`clue-card ${isRead ? 'read' : ''} ${!isAvailable && !isRead ? 'locked' : ''}`} key={clue.id}>
+                return <article className={`clue-card ${isRead ? 'read' : ''} ${!isAvailable && !isRead ? 'locked' : ''}`} id={`lead-${clue.id}`} tabIndex={-1} aria-label={clue.title} key={clue.id}>
                   <div className="clue-icon"><Icon name={!isAvailable && !isRead ? 'lock' : clue.kind} size={21} /></div>
                   <div className="clue-body"><div className="clue-kicker">{kindLabels[clue.kind]} <span>· {String(index + 1).padStart(2, '0')}</span>{isRead && <span className="read-label"><Icon name="check" size={12} /> READ</span>}</div><h4>{clue.title}</h4>
                     {isRead ? <><p className="clue-text">{clue.text}</p><button type="button" className={`pin-button ${progress.pinned.includes(clue.id) ? 'is-pinned' : ''}`} aria-pressed={progress.pinned.includes(clue.id)} aria-label={`${progress.pinned.includes(clue.id) ? 'Unpin' : 'Pin'} ${clue.title}`} onClick={() => togglePin(clue.id)}><Icon name="pin" size={14} />{progress.pinned.includes(clue.id) ? 'Pinned to notebook' : 'Pin to notebook'}</button></> : isAvailable ? <><p className="clue-preview">A new detail is waiting. Take a closer look.</p><button type="button" className="read-button" data-testid={`clue-${clue.id}`} onClick={() => readClue(clue)}>Read {clue.kind === 'interview' ? 'interview' : clue.kind === 'record' ? 'record' : 'clue'}<Icon name="arrow" size={16} /></button></> : <><p className="locked-copy">Read {missing.map((id) => activeCase.clues.find((item) => item.id === id)?.title ?? 'the preceding clue').join(' and ')} to unlock this lead.</p><button type="button" className="locked-button" data-testid={`clue-${clue.id}`} disabled><Icon name="lock" size={13} /> Lead not yet available</button></>}
@@ -219,10 +224,14 @@ export default function App() {
               })}</div>
               {activeCase.clues.filter((clue) => filter === 'all' || clue.kind === filter).length === 0 && <p className="empty-state">No leads in this category. Try another filter.</p>}
             </section>
+            <section className="suspects-section" id="suspects" tabIndex={-1} aria-labelledby="suspects-title">
+              <div className="section-heading"><h3 id="suspects-title">The people involved</h3><span>{activeCase.suspects.length} PERSONS OF INTEREST</span></div>
+              <div className="suspect-grid">{activeCase.suspects.map((suspect, index) => <article className="suspect-card" key={suspect.id}><div className="suspect-portrait" aria-hidden="true"><span>{suspect.name.split(' ').map((part) => part[0]).slice(0, 2).join('')}</span><svg viewBox="0 0 90 90" fill="none"><circle cx="45" cy="34" r="15" /><path d="M18 88V76c0-17 12-26 27-26s27 9 27 26v12" /></svg><span className="portrait-index">0{index + 1}</span></div><h4>{suspect.name}</h4><p>{suspect.role}</p><details className="statement"><summary>Initial statement</summary><p>“{suspect.statement}”</p></details></article>)}</div>
+            </section>
           </div>
 
           <aside className="detective-column" aria-label="Your investigation tools">
-            <section className="notebook panel" aria-labelledby="notebook-title">
+            <section className="notebook panel" id="notebook" tabIndex={-1} aria-labelledby="notebook-title">
               <div className="notebook-binding" aria-hidden="true"><i /><i /><i /><i /><i /><i /></div>
               <div className="notebook-heading"><h3 id="notebook-title">Your notebook</h3><span className="handwritten">leave no loose ends</span></div>
               <label className="eyebrow" htmlFor="notes">THOUGHTS & CONNECTIONS</label>
@@ -232,7 +241,7 @@ export default function App() {
               {progress.pinned.length === 0 ? <div className="pin-empty"><span className="empty-pin"><Icon name="pin" size={21} /></span><p>A place for the details that matter.</p><span>Read a clue and pin it here for reference.</span></div> : <ul className="pinned-list">{discovered.filter((clue) => progress.pinned.includes(clue.id)).map((clue) => <li key={clue.id}><div><strong>{clue.title}</strong><p>{clue.text}</p></div><button type="button" className="unpin" aria-label={`Unpin ${clue.title}`} onClick={() => togglePin(clue.id)}>×</button></li>)}</ul>}
             </section>
 
-            <section className={`accusation panel ${progress.solved ? 'solved-panel' : ''}`} aria-labelledby="accusation-title">
+            <section className={`accusation panel ${progress.solved ? 'solved-panel' : ''}`} id="accusation" tabIndex={-1} aria-labelledby="accusation-title">
               {progress.solved ? <>
                 <div className="solution-seal"><Icon name="check" size={27} /></div>
                 <div className="eyebrow">THE TRUTH, UNCOVERED</div><h3 id="accusation-title">Case closed.</h3>

@@ -409,9 +409,63 @@ dialog::backdrop { background: #192b25a6; backdrop-filter: blur(3px); }
 .statement summary { min-height: 38px; display: list-item; }
 .locked-button { min-height: 38px; }
 .daily-date span { font-size: 10px; }
+.hero { min-height: 230px; }
+.hero-copy { padding: 24px 0; }
+.hero h1 { font-size: clamp(40px, 4vw, 56px); margin: 12px 0; }
+.desk-art { max-height: 200px; }
+.masthead { min-height: 86px; }
+.hero-link { min-height: 44px; margin-top: 12px; font-size: 13px; }
+.edition-bar { margin-bottom: 20px; padding: 14px 0; }
+.investigation-nav { position: sticky; top: 0; z-index: 5; display: flex; gap: 8px; padding: 10px 0; background: #f4f1e9; border-bottom: 1px solid #d5d4c4; margin-bottom: 20px; }
+.investigation-nav a { display: inline-flex; gap: 8px; align-items: center; justify-content: center; min-height: 44px; padding: 10px 18px; border: 1px solid #c2cabb; border-radius: 6px; background: #fffcf5; font-size: 13px; text-decoration: none; font-weight: 600; }
+.investigation-nav a:hover { background: #e4ebdc; }
+.investigation-nav a span { font-size: 12px; color: #52624b; }
+.case-next-action { margin-top: 20px; }
+.case-next-action a { max-width: 310px; text-decoration: none; border-radius: 6px; font-size: 14px; }
+.case-next-action p { margin: 10px 0 0; font-size: 13px; line-height: 1.7; color: #53614c; }
+.investigation-update { padding: 12px; border-left: 3px solid #748761; background: #e9eee1; font-size: 13px; line-height: 1.7; color: #3c5236; }
+#case-file, #evidence, #suspects, #notebook, #accusation { scroll-margin-top: 84px; }
+.read-button, .pin-button, .unpin, .hint-panel > button, .evidence-filters button, .statement summary { min-height: 44px; }
+.unpin { min-width: 44px; }
+.read-button, .pin-button, .hint-panel > button, .evidence-filters button { font-size: 13px; }
+.clue-text, .case-brief, .section-intro, .clue-preview, .locked-copy { font-size: 14px; }
+.clue-kicker, .clue-kicker .read-label, .case-progress, .save-label { font-size: 12px; }
+.accusation form > label, .evidence-help, .accusation .evidence-option > span { font-size: 13px; }
+@media (max-width: 700px) {
+  .hero { display: block; min-height: 0; }
+  .hero-copy { padding: 20px 0; }
+  .hero h1 { font-size: 38px; letter-spacing: -1.5px; }
+  .hero h1 br { display: none; }
+  .hero h1 em::before { content: ' '; }
+  .hero-copy > p { max-width: none; font-size: 14px; }
+  .hero-art, .hero-number { display: none; }
+  .hero-copy .eyebrow { font-size: 10px; letter-spacing: .8px; }
+  .edition-bar { gap: 12px; margin-bottom: 4px; }
+  .daily-date { display: none; }
+  .archive-picker { max-width: none; width: 100%; gap: 10px; }
+  .archive-picker label { font-size: 10px; letter-spacing: .5px; }
+  .archive-picker select { flex: 1; width: 100%; min-width: 0; font-size: 16px; }
+  .investigation-nav { gap: 6px; }
+  .investigation-nav a { padding: 10px 5px; flex: 1; font-size: 12px; gap: 4px; }
+  .investigation-nav a span { font-size: 11px; }
+  .case-cover { padding: 20px; }
+  .case-cover h2 { font-size: 29px; margin-top: 18px; }
+  .case-brief, .clue-text, .locked-copy { font-size: 14px; }
+  .case-next-action a { max-width: none; }
+  .case-next-action p { font-size: 13px; }
+  .suspect-grid { grid-template-columns: 1fr; gap: 12px; }
+  .suspect-card { text-align: left; padding: 14px; }
+  .suspect-portrait { display: none; }
+  .suspect-card h4 { font-size: 19px; margin-top: 0; }
+  .suspect-card > p { font-size: 13px; min-height: 0; }
+  .statement summary { font-size: 13px; }
+  .statement p { font-size: 14px; }
+  .notebook > label, .pinned-heading h4, .selection-counter { font-size: 12px; }
+  .accusation-intro, .pinned-list p { font-size: 14px; }
+}
 @media (max-width: 430px) {
-  .hero-copy .eyebrow { font-size: 8px; letter-spacing: .5px; }
-  .edition { font-size: 8px; letter-spacing: .5px; }
-  .section-heading > span { font-size: 9px; }
-  .clue-kicker, .clue-kicker .read-label { font-size: 9px; letter-spacing: .5px; }
+  .hero-copy .eyebrow { font-size: 10px; letter-spacing: .5px; }
+  .edition { font-size: 10px; letter-spacing: .5px; }
+  .section-heading > span { font-size: 12px; }
+  .clue-kicker, .clue-kicker .read-label { font-size: 12px; letter-spacing: .5px; }
 }

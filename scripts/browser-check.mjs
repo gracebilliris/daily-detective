@@ -123,6 +123,25 @@ try {
   await page.getByTestId('case-select').selectOption(cases[2].id);
   await expect(page.getByTestId('notes')).toHaveValue('Mobile investigation works.');
   tested.push('390px mobile layout, clue interaction and persisted input');
+  await page.getByRole('navigation', { name: 'Investigation sections' }).getByRole('link', { name: 'Notebook', exact: true }).click();
+  await expect(page.locator('#notebook')).toBeInViewport();
+  await page.getByRole('navigation', { name: 'Investigation sections' }).getByRole('link', { name: 'Solve', exact: true }).click();
+  await expect(page.locator('#accusation')).toBeInViewport();
+  await page.evaluate((key) => localStorage.removeItem(key), STORAGE_KEY);
+  await page.reload({ waitUntil: 'networkidle' });
+  await expect(page.getByRole('link', { name: 'Read your first clue', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'Read your first clue', exact: true }).click();
+  await expect(page.locator('#evidence')).toBeFocused();
+  await expect(page.locator('#evidence')).toBeInViewport();
+  const firstLead = dailyCase(new Date(...localParts)).clues.find(clue => !clue.requires.length);
+  await page.getByTestId(`clue-${firstLead.id}`).click();
+  await expect(page.locator(`#lead-${firstLead.id}`)).toBeFocused();
+  await expect(page.locator('.investigation-update')).toContainText(firstLead.title);
+  for (const link of await page.locator('.investigation-nav a').all()) {
+    const box = await link.boundingBox();
+    assert.ok(box.width >= 44 && box.height >= 44, 'Investigation shortcuts have comfortable touch targets');
+  }
+  tested.push('First-clue guidance, evidence-first jump/focus, persistent notebook/solve shortcuts and visible read feedback');
 
   const assets = await page.locator('script[src], link[rel="stylesheet"], link[rel="icon"]').evaluateAll((nodes) => nodes.map((node) => node.src || node.href));
   assert.ok(assets.length >= 3);
